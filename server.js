@@ -22,6 +22,13 @@ const server = http.createServer((req, res) => {
           "utf-8"
         );
       }
+    } else if (req.url === "/public/images/image.jpg") {
+      if (req.method === "GET") {
+        res.writeHead(200, { "content-type": "image/jpeg" });
+        htmlPageContent = fs.readFileSync(
+          path.join(__dirname, "public", "images", "image.jpg")
+        );
+      }
     } else {
       res.writeHead(404, { "content-type": "text/html" });
       htmlPageContent = fs.readFileSync(

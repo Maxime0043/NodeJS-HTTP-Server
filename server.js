@@ -29,6 +29,13 @@ const server = http.createServer((req, res) => {
           path.join(__dirname, "public", "images", "image.jpg")
         );
       }
+    } else if (req.url === "/public/css/style.css") {
+      if (req.method === "GET") {
+        res.writeHead(200, { "content-type": "text/css" });
+        htmlPageContent = fs.readFileSync(
+          path.join(__dirname, "public", "css", "style.css")
+        );
+      }
     } else {
       res.writeHead(404, { "content-type": "text/html" });
       htmlPageContent = fs.readFileSync(

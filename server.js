@@ -51,9 +51,17 @@ const server = http.createServer((req, res) => {
       }
     } else if (req.url === "/api/names") {
       if (req.method === "GET") {
-        res.writeHead(404, { "content-type": "application/json" });
+        res.writeHead(200, { "content-type": "application/json" });
         result = Object.fromEntries(memoryDb);
         result = JSON.stringify(result);
+      }
+    } else if (req.url.match(/\/api\/names\/\d+/g)) {
+      let id = parseInt(req.url.split("/")[3]);
+
+      if (req.method === "GET") {
+        res.writeHead(200, { "content-type": "application/json" });
+        result = Object.fromEntries(memoryDb);
+        result = JSON.stringify(result[id]);
       }
     } else {
       res.writeHead(404, { "content-type": "text/html" });

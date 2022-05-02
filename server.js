@@ -10,6 +10,9 @@ const server = http.createServer((req, res) => {
       res.writeHead(405, { "content-type": "text/html" });
       res.write("<h1>405 - Méthode non authorisée</h1>");
     }
+  } else {
+    res.writeHead(404, { "content-type": "text/html" });
+    res.write("<h1>404 - Page introuvable</h1>");
   }
 
   res.end();

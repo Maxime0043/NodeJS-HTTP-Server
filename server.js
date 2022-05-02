@@ -1,9 +1,16 @@
 const fs = require("fs");
 const path = require("path");
 
+const memoryDb = new Map(); // est global
+let id = 0;
+
+memoryDb.set(id++, { nom: "Alice" }); // voici comment set une nouvelle entrée.
+memoryDb.set(id++, { nom: "Bob" });
+memoryDb.set(id++, { nom: "Charlie" });
+
 const http = require("http");
 const server = http.createServer((req, res) => {
-  let htmlPageContent;
+  let result;
 
   try {
     // ROUTES
@@ -11,13 +18,13 @@ const server = http.createServer((req, res) => {
       // METHODE GET
       if (req.method === "GET") {
         res.writeHead(200, { "content-type": "text/html" });
-        htmlPageContent = fs.readFileSync(
+        result = fs.readFileSync(
           path.join(__dirname, "public", "pages", "index.html"),
           "utf-8"
         );
       } else {
         res.writeHead(405, { "content-type": "text/html" });
-        htmlPageContent = fs.readFileSync(
+        result = fs.readFileSync(
           path.join(__dirname, "public", "pages", "405.html"),
           "utf-8"
         );
@@ -32,32 +39,38 @@ const server = http.createServer((req, res) => {
         else if (file[1] === "jpg") contentType = "image/jpg";
 
         res.writeHead(200, { "content-type": contentType });
-        htmlPageContent = fs.readFileSync(
+        result = fs.readFileSync(
           path.join(__dirname, "public", file[1], file[0] + "." + file[1])
         );
       } else {
         res.writeHead(405, { "content-type": "text/html" });
-        htmlPageContent = fs.readFileSync(
+        result = fs.readFileSync(
           path.join(__dirname, "public", "pages", "405.html"),
           "utf8"
         );
       }
+    } else if (req.url === "/api/names") {
+      if (req.method === "GET") {
+        res.writeHead(404, { "content-type": "application/json" });
+        result = Object.fromEntries(memoryDb);
+        result = JSON.stringify(result);
+      }
     } else {
       res.writeHead(404, { "content-type": "text/html" });
-      htmlPageContent = fs.readFileSync(
+      result = fs.readFileSync(
         path.join(__dirname, "public", "pages", "404.html"),
         "utf-8"
       );
     }
   } catch (err) {
     res.writeHead(500, { "content-type": "text/html" });
-    htmlPageContent = fs.readFileSync(
+    result = fs.readFileSync(
       path.join(__dirname, "public", "pages", "500.html"),
       "utf-8"
     );
   }
 
-  res.write(htmlPageContent);
+  res.write(result);
   res.end();
 });
 

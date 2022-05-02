@@ -36,6 +36,13 @@ const server = http.createServer((req, res) => {
           path.join(__dirname, "public", "css", "style.css")
         );
       }
+    } else if (req.url === "/public/js/script.js") {
+      if (req.method === "GET") {
+        res.writeHead(200, { "content-type": "application/javascript" });
+        htmlPageContent = fs.readFileSync(
+          path.join(__dirname, "public", "js", "script.js")
+        );
+      }
     } else {
       res.writeHead(404, { "content-type": "text/html" });
       htmlPageContent = fs.readFileSync(

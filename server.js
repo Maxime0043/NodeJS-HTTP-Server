@@ -62,19 +62,34 @@ const server = http.createServer((req, res) => {
     }
 
     // ROUTE API
-    else if (req.url === "/api/names") {
-      if (req.method === "GET") {
-        res.writeHead(200, { "content-type": "application/json" });
-        result = Object.fromEntries(memoryDb);
-        result = JSON.stringify(result);
+    else if (req.url.match("/api/names")) {
+      // LISTER LES DONNEES
+      if (req.url === "/api/names") {
+        if (req.method === "GET") {
+          res.writeHead(200, { "content-type": "application/json" });
+          result = Object.fromEntries(memoryDb);
+          result = JSON.stringify(result);
+        }
       }
-    } else if (req.url.match(/\/api\/names\/\d+/g)) {
-      let id = parseInt(req.url.split("/")[3]);
 
-      if (req.method === "GET") {
-        res.writeHead(200, { "content-type": "application/json" });
-        result = Object.fromEntries(memoryDb);
-        result = JSON.stringify(result[id]);
+      // DETAILLER LES DONNEES
+      else if (req.url.match(/\/api\/names\/\d+/g)) {
+        let id = parseInt(req.url.split("/")[3]);
+
+        if (req.method === "GET") {
+          res.writeHead(200, { "content-type": "application/json" });
+          result = Object.fromEntries(memoryDb);
+          result = JSON.stringify(result[id]);
+        }
+      }
+
+      // AUTRES REQUÊTES
+      else {
+        res.writeHead(404, { "content-type": "text/html" });
+        result = fs.readFileSync(
+          path.join(__dirname, "public", "pages", "404.html"),
+          "utf8"
+        );
       }
     }
 

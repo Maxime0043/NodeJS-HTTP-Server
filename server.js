@@ -109,59 +109,95 @@ const server = http.createServer((req, res) => {
             res.end();
           });
         }
+
+        // AUTRES METHODES
+        else {
+          res.writeHead(405, { "content-type": "text/html" });
+          result = fs.readFileSync(
+            path.join(__dirname, "public", "pages", "405.html"),
+            "utf8"
+          );
+          res.write(result);
+          res.end();
+        }
       }
 
       // DETAILLER / SUPPRIMER DES DONNEES
       else if (req.url.match(/\/api\/names\/\d+/g)) {
         let id = parseInt(req.url.split("/")[3]);
 
-        // METHODE GET
-        if (req.method === "GET") {
-          res.writeHead(200, { "content-type": "application/json" });
-          result = Object.fromEntries(memoryDb);
-          result = JSON.stringify(result[id]);
-          res.write(result);
-          res.end();
-        }
-
-        // METHODE DELETE
-        else if (req.method === "DELETE") {
-          res.writeHead(200, { "content-type": "application/json" });
-          result = Object.fromEntries(memoryDb);
-          result = JSON.stringify(result[id]);
-
-          memoryDb.delete(id);
-
-          res.write(result);
-          res.end();
-        }
-
-        // METHODE PUT
-        else if (req.method === "PUT") {
-          let data = "";
-
-          req.on("data", (chunk) => {
-            data += chunk;
-          });
-
-          req.on("end", () => {
-            data = JSON.parse(data);
-
-            // Vérification des données envoyées
-            if ("name" in data) {
-              res.writeHead(201, { "content-type": "application/json" });
-              memoryDb.set(id, { nom: data.name });
-              result = JSON.stringify(data);
-              res.write(result);
-            }
-
-            // Modification impossible
-            else {
-              res.writeHead(424);
-            }
-
+        // L'identifiant existe
+        if (memoryDb.has(id)) {
+          // METHODE GET
+          if (req.method === "GET") {
+            res.writeHead(200, { "content-type": "application/json" });
+            result = Object.fromEntries(memoryDb);
+            result = JSON.stringify(result[id]);
+            res.write(result);
             res.end();
-          });
+          }
+
+          // METHODE DELETE
+          else if (req.method === "DELETE") {
+            res.writeHead(200, { "content-type": "application/json" });
+            result = Object.fromEntries(memoryDb);
+            result = JSON.stringify(result[id]);
+
+            memoryDb.delete(id);
+
+            res.write(result);
+            res.end();
+          }
+
+          // METHODE PUT
+          else if (req.method === "PUT") {
+            let data = "";
+
+            req.on("data", (chunk) => {
+              data += chunk;
+            });
+
+            req.on("end", () => {
+              data = JSON.parse(data);
+
+              // Vérification des données envoyées
+              if ("name" in data) {
+                res.writeHead(201, { "content-type": "application/json" });
+                memoryDb.set(id, { nom: data.name });
+                result = JSON.stringify(data);
+                res.write(result);
+              }
+
+              // Modification impossible
+              else {
+                res.writeHead(424);
+              }
+
+              res.end();
+            });
+          }
+
+          // AUTRES METHODES
+          else {
+            res.writeHead(405, { "content-type": "text/html" });
+            result = fs.readFileSync(
+              path.join(__dirname, "public", "pages", "405.html"),
+              "utf8"
+            );
+            res.write(result);
+            res.end();
+          }
+        }
+
+        // L'identifiant n'existe pas
+        else {
+          res.writeHead(404, { "content-type": "text/html" });
+          result = fs.readFileSync(
+            path.join(__dirname, "public", "pages", "404.html"),
+            "utf8"
+          );
+          res.write(result);
+          res.end();
         }
       }
 

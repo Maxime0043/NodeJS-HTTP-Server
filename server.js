@@ -10,7 +10,7 @@ memoryDb.set(id++, { nom: "Charlie" });
 
 const http = require("http");
 const server = http.createServer((req, res) => {
-  let result;
+  let result = "";
 
   try {
     // ROUTES
@@ -22,6 +22,8 @@ const server = http.createServer((req, res) => {
           path.join(__dirname, "public", "pages", "index.html"),
           "utf-8"
         );
+        res.write(result);
+        res.end();
       }
 
       // AUTRES METHODES
@@ -31,6 +33,8 @@ const server = http.createServer((req, res) => {
           path.join(__dirname, "public", "pages", "405.html"),
           "utf-8"
         );
+        res.write(result);
+        res.end();
       }
     }
 
@@ -49,6 +53,8 @@ const server = http.createServer((req, res) => {
         result = fs.readFileSync(
           path.join(__dirname, "public", file[1], file[0] + "." + file[1])
         );
+        res.write(result);
+        res.end();
       }
 
       // AUTRES METHODES
@@ -58,6 +64,8 @@ const server = http.createServer((req, res) => {
           path.join(__dirname, "public", "pages", "405.html"),
           "utf8"
         );
+        res.write(result);
+        res.end();
       }
     }
 
@@ -65,10 +73,41 @@ const server = http.createServer((req, res) => {
     else if (req.url.match("/api/names")) {
       // LISTER LES DONNEES
       if (req.url === "/api/names") {
+        // METHODE GET
         if (req.method === "GET") {
           res.writeHead(200, { "content-type": "application/json" });
           result = Object.fromEntries(memoryDb);
           result = JSON.stringify(result);
+          res.write(result);
+          res.end();
+        }
+
+        // METHODE POST
+        else if (req.method === "POST") {
+          let data = "";
+
+          req.on("data", (chunk) => {
+            data += chunk;
+          });
+
+          req.on("end", () => {
+            data = JSON.parse(data);
+
+            // Vérification des données envoyées
+            if ("name" in data) {
+              res.writeHead(201, { "content-type": "application/json" });
+              memoryDb.set(id++, { nom: data.name });
+              result = JSON.stringify(data);
+              res.write(result);
+            }
+
+            // Création impossible
+            else {
+              res.writeHead(424);
+            }
+
+            res.end();
+          });
         }
       }
 
@@ -76,10 +115,13 @@ const server = http.createServer((req, res) => {
       else if (req.url.match(/\/api\/names\/\d+/g)) {
         let id = parseInt(req.url.split("/")[3]);
 
+        // METHODE GET
         if (req.method === "GET") {
           res.writeHead(200, { "content-type": "application/json" });
           result = Object.fromEntries(memoryDb);
           result = JSON.stringify(result[id]);
+          res.write(result);
+          res.end();
         }
       }
 
@@ -90,6 +132,8 @@ const server = http.createServer((req, res) => {
           path.join(__dirname, "public", "pages", "404.html"),
           "utf8"
         );
+        res.write(result);
+        res.end();
       }
     }
 
@@ -100,6 +144,8 @@ const server = http.createServer((req, res) => {
         path.join(__dirname, "public", "pages", "404.html"),
         "utf-8"
       );
+      res.write(result);
+      res.end();
     }
   } catch (err) {
     res.writeHead(500, { "content-type": "text/html" });
@@ -107,10 +153,9 @@ const server = http.createServer((req, res) => {
       path.join(__dirname, "public", "pages", "500.html"),
       "utf-8"
     );
+    res.write(result);
+    res.end();
   }
-
-  res.write(result);
-  res.end();
 });
 
 server.listen(5000);

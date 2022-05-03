@@ -135,6 +135,34 @@ const server = http.createServer((req, res) => {
           res.write(result);
           res.end();
         }
+
+        // METHODE PUT
+        else if (req.method === "PUT") {
+          let data = "";
+
+          req.on("data", (chunk) => {
+            data += chunk;
+          });
+
+          req.on("end", () => {
+            data = JSON.parse(data);
+
+            // Vérification des données envoyées
+            if ("name" in data) {
+              res.writeHead(201, { "content-type": "application/json" });
+              memoryDb.set(id, { nom: data.name });
+              result = JSON.stringify(data);
+              res.write(result);
+            }
+
+            // Modification impossible
+            else {
+              res.writeHead(424);
+            }
+
+            res.end();
+          });
+        }
       }
 
       // AUTRES REQUÊTES

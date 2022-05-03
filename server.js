@@ -71,7 +71,7 @@ const server = http.createServer((req, res) => {
 
     // ROUTE API
     else if (req.url.match("/api/names")) {
-      // LISTER LES DONNEES
+      // LISTER / AJOUTER DES DONNEES
       if (req.url === "/api/names") {
         // METHODE GET
         if (req.method === "GET") {
@@ -111,7 +111,7 @@ const server = http.createServer((req, res) => {
         }
       }
 
-      // DETAILLER LES DONNEES
+      // DETAILLER / SUPPRIMER DES DONNEES
       else if (req.url.match(/\/api\/names\/\d+/g)) {
         let id = parseInt(req.url.split("/")[3]);
 
@@ -120,6 +120,18 @@ const server = http.createServer((req, res) => {
           res.writeHead(200, { "content-type": "application/json" });
           result = Object.fromEntries(memoryDb);
           result = JSON.stringify(result[id]);
+          res.write(result);
+          res.end();
+        }
+
+        // METHODE DELETE
+        else if (req.method === "DELETE") {
+          res.writeHead(200, { "content-type": "application/json" });
+          result = Object.fromEntries(memoryDb);
+          result = JSON.stringify(result[id]);
+
+          memoryDb.delete(id);
+
           res.write(result);
           res.end();
         }
